@@ -4,21 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>沪深95板块轮动热力图 / HS95 Sector Rotation Heatmap</title>
-<script src="https://cdn.jsdelivr.net/npm/web3@1.8.1/dist/web3.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;font-size:13px;background:#f2f2f7;color:#1a1a1a}
 
-/* 顶部导航区域及右上角按钮样式 */
+/* 顶部导航区域及右上角语言按钮样式 */
 .header{background:#fff;padding:12px 16px;border-bottom:1px solid #e0e0e0;position:relative}
-h1{font-size:15px;font-weight:600;margin-bottom:10px;color:#1a1a1a;padding-right:180px;} /* 留出右上角空间 */
+h1{font-size:15px;font-weight:600;margin-bottom:10px;color:#1a1a1a;padding-right:90px;} /* 留出右上角空间 */
 
 .top-right-actions {
   position: absolute;
   top: 10px;
   right: 16px;
   display: flex;
-  gap: 8px;
   align-items: center;
 }
 .action-btn {
@@ -35,12 +33,6 @@ h1{font-size:15px;font-weight:600;margin-bottom:10px;color:#1a1a1a;padding-right
   gap: 4px;
 }
 .action-btn:active { background: #f5f5f7; }
-.btn-pay {
-  background: #c0392b;
-  color: #fff;
-  border-color: #c0392b;
-}
-.btn-pay:active { background: #a93226; }
 
 .tab-bar{display:flex;gap:6px;margin-bottom:0;flex-wrap:wrap}
 .tab-bar button{font-size:12px;padding:6px 12px;border-radius:20px;background:#f2f2f7;border:none;color:#666;cursor:pointer;font-family:inherit}
@@ -72,60 +64,21 @@ td:nth-child(2){font-size:10px;color:#999;text-align:center}
 td.val{font-weight:600;font-size:11px;border-radius:0}
 .note{background:#f2f2f7;padding:10px 16px;font-size:11px;color:#aaa;line-height:1.5}
 
-/* 付费订阅拦截遮罩层样式 */
-#payOverlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(255, 255, 255, 0.98); z-index: 9999;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 20px; text-align: center; display: none;
-}
-.pay-box {
-  background: #fff; padding: 30px; border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08); max-width: 360px; width: 100%;
-}
-.pay-title { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #1a1a1a; }
-.pay-desc { font-size: 13px; color: #666; margin-bottom: 24px; line-height: 1.6; }
-.pay-price { font-size: 28px; font-weight: 700; color: #c0392b; margin-bottom: 24px; }
-.pay-price span { font-size: 14px; font-weight: normal; color: #888; }
-.pay-btn {
-  background: #1a1a1a; color: #fff; border: none; padding: 12px 24px;
-  border-radius: 10px; font-size: 14px; font-weight: 500; cursor: pointer;
-  width: 100%; transition: background 0.2s;
-}
-.pay-btn:disabled { background: #999; cursor: not-allowed; }
-.pay-status { margin-top: 15px; font-size: 12px; color: #e67e22; min-height: 18px; }
-.close-overlay-btn {
-  margin-top: 12px; background: none; border: none; color: #888; font-size: 12px; text-decoration: underline; cursor: pointer;
-}
-
-/* 移动端特殊适配优化 */
+/* 移动端优化 */
 @media(max-width: 480px) {
-  h1 { padding-right: 140px; font-size: 12px; }
-  .top-right-actions { top: 8px; right: 8px; gap: 4px; }
+  h1 { padding-right: 75px; font-size: 13px; }
+  .top-right-actions { top: 8px; right: 8px; }
   .action-btn { padding: 4px 6px; font-size: 10px; }
 }
 </style>
 </head>
 <body>
 
-<div id="payOverlay">
-  <div class="pay-box">
-    <div class="pay-title" id="popTitle">🔒 试用期已结束</div>
-    <div class="pay-desc" id="popDesc">您的3天免费试用已到期。如需继续查看2020–2026核心轮动热力数据，请订阅解锁。</div>
-    <div class="pay-price">0.005 <span>ETH</span></div>
-    <button class="pay-btn" id="actionBtn" onclick="handleSubscription()">连接钱包并订阅 / Pay</button>
-    <div class="pay-status" id="payStatus"></div>
-    <button id="closeModalBtn" class="close-overlay-btn" onclick="hidePayModal()" style="display:none;">暂不订阅，返回查看</button>
-    <button class="action-btn" style="margin-top:15px; width:100%; justify-content:center" onclick="toggleLang()">🌐 Switch Language</button>
-  </div>
-</div>
-
 <div class="header">
   <h1 id="mainTitle">沪深95个板块资金轮动热力图（2020–2026）</h1>
   
   <div class="top-right-actions">
     <button class="action-btn" onclick="toggleLang()">🌐 <span id="langBtnTxt">EN</span></button>
-    <button class="action-btn btn-pay" onclick="showPayModal(true)">🪙 <span id="payBtnTxt">计算中...</span></button>
   </div>
 
   <div class="tab-bar">
@@ -178,109 +131,32 @@ td.val{font-weight:600;font-size:11px;border-radius:0}
 <div class="note" id="pageNote">数据基于申万行业指数体系及公开市场研究数据综合估算（2020–2026）。涨跌幅单位：%。2026年数据包含最新趋势推算。仅供参考，不构成投资建议。</div>
 
 <script>
-// 收款人钱包配置
-var MERCHANT_ADDRESS = "0x13327a955154560382Ef61b2FbAdf8afc58595ef"; 
-var SUB_PRICE_ETH = "0.005"; 
-var TRIAL_DURATION = 3 * 24 * 60 * 60 * 1000; // 3天的毫秒数
-
 // 语言环境管理
 var currentLang = "zh"; 
 var i18n = {
   zh: {
     title: "沪深95个板块资金轮动热力图（2020–2026）",
-    payBtn: "订阅", unlocked: "已解锁", trialLeft: "试用剩", days: "天",
     tabHeat: "🔥 热力图", tabRank: "📊 年度排名", tabBest: "🏆 最佳/最差",
     lblFilter: "筛选：", lblSort: "排序：",
     optAll: "全部板块", optTech: "大科技", optConsume: "大消费", optCycle: "大周期", optFinance: "大金融", optMake: "高端制造", optPharma: "医药健康", optEnergy: "能源资源",
     sortCat: "按大类", sortAvg: "按均涨幅↓", searchPlh: "搜索板块...",
     legend: "色阶：大涨>50% &nbsp; 涨>10% &nbsp; 微涨 &nbsp; 微跌 &nbsp; 跌>-25% &nbsp; 大跌>-40%",
     note: "数据基于申万行业指数体系及公开市场研究数据综合估算（2020–2026）。涨跌幅单位：%。2026年数据包含最新趋势推算。仅供参考，不构成投资建议。",
-    popTitle: "🔒 试用期已结束", popDesc: "您的3天免费试用已到期。如需继续查看2020–2026核心轮动热力数据，请订阅解锁。",
-    popTitleManual: "🪙 订阅高级版", popDescManual: "提前订阅可无限制终身访问2020–2026热力图核心数据面板。",
     statCount: "板块数：", statMaxW: "最大涨幅：", statMinW: "最大跌幅：",
-    thSec: "板块", thCat: "类", thAvg: "均值", thBestY: "最佳年", thBestW: "最佳涨幅", thWorstY: "最差年", thWorstW: "最差涨幅", thAvgW: "7年均值", thWinR: "胜率",
-    walletErr: "未检测到加密钱包，请在手机端使用 MetaMask/TokenPocket App 内置浏览器打开此网页。",
-    walletConn: "正在请求连接钱包...", walletSign: "准备发起支付请求，请在钱包中确认...",
-    paySuccess: "🎉 订阅成功！正在解锁页面...", payCancel: "用户取消了支付签名。"
+    thSec: "板块", thCat: "类", thAvg: "均值", thBestY: "最佳年", thBestW: "最佳涨幅", thWorstY: "最差年", thWorstW: "最差涨幅", thAvgW: "7年均值", thWinR: "胜率"
   },
   en: {
     title: "HS95 Sector Rotation Heatmap (2020–2026)",
-    payBtn: "Subscribe", unlocked: "Unlocked", trialLeft: "Trial: ", days: "d",
     tabHeat: "🔥 Heatmap", tabRank: "📊 Rankings", tabBest: "🏆 Best/Worst",
     lblFilter: "Filter: ", lblSort: "Sort: ",
     optAll: "All Sectors", optTech: "Tech", optConsume: "Consumer", optCycle: "Cyclical", optFinance: "Financial", optMake: "Mfg", optPharma: "Healthcare", optEnergy: "Energy",
     sortCat: "By Class", sortAvg: "By Avg Return↓", searchPlh: "Search sector...",
     legend: "Legend: Gain>50% &nbsp; Gain>10% &nbsp; Flat+ &nbsp; Flat- &nbsp; Loss>-25% &nbsp; Drop>-40%",
     note: "Based on Shenwan industry indexes & public data estimates. Unit: %. 2026 includes projections. For reference only, not investment advice.",
-    popTitle: "🔒 Trial Expired", popDesc: "Your 3-day free trial has expired. Please subscribe to continue accessing 2020-2026 data.",
-    popTitleManual: "🪙 Premium Subscription", popDescManual: "Subscribe now for unrestricted lifetime access to the 2020–2026 core matrix.",
     statCount: "Sectors: ", statMaxW: "Max Gain: ", statMinW: "Max Loss: ",
-    thSec: "Sector", thCat: "Class", thAvg: "Avg", thBestY: "Best Yr", thBestW: "Best Gain", thWorstY: "Worst Yr", thWorstW: "Worst Loss", thAvgW: "7Y Avg", thWinR: "Win Rate",
-    walletErr: "No crypto wallet detected. Please open this page in MetaMask or TokenPocket App browser.",
-    walletConn: "Connecting wallet...", walletSign: "Please confirm payment in your wallet...",
-    paySuccess: "🎉 Subscribed successfully! Unlocking...", payCancel: "Transaction rejected by user."
+    thSec: "Sector", thCat: "Class", thAvg: "Avg", thBestY: "Best Yr", thBestW: "Best Gain", thWorstY: "Worst Yr", thWorstW: "Worst Loss", thAvgW: "7Y Avg", thWinR: "Win Rate"
   }
 };
-
-// 检查并初始化定时计费逻辑
-function checkAuth() {
-  var t = i18n[currentLang];
-  var pBtn = document.getElementById("payBtnTxt");
-
-  // 1. 如果已经付过款
-  if (localStorage.getItem("isSubscribed_95") === "true") {
-    document.getElementById("payOverlay").style.display = "none";
-    if (pBtn) pBtn.innerText = t.unlocked;
-    return true;
-  }
-
-  // 2. 定时收费核心逻辑
-  var firstOpenTime = localStorage.getItem("first_open_time_95");
-  var now = new Date().getTime();
-
-  if (!firstOpenTime) {
-    // 第一次打开网页，记录初始时间戳
-    localStorage.setItem("first_open_time_95", now);
-    firstOpenTime = now;
-  }
-
-  var timeElapsed = now - parseInt(firstOpenTime);
-  var timeLeft = TRIAL_DURATION - timeElapsed;
-
-  if (timeLeft <= 0) {
-    // 3天倒计时结束：强制弹出拦截，且不允许关闭
-    document.getElementById("popTitle").innerText = t.popTitle;
-    document.getElementById("popDesc").innerText = t.popDesc;
-    document.getElementById("closeModalBtn").style.display = "none";
-    document.getElementById("payOverlay").style.display = "flex";
-    if (pBtn) pBtn.innerText = t.payBtn;
-    return false;
-  } else {
-    // 还在试用期内：不进行拦截
-    document.getElementById("payOverlay").style.display = "none";
-    var daysLeft = (timeLeft / (1000 * 60 * 60 * 24)).toFixed(1);
-    if (pBtn) pBtn.innerText = t.trialLeft + " " + daysLeft + t.days;
-    return true;
-  }
-}
-
-// 用户手动点击右上角按钮时弹出弹窗
-function showPayModal(isManualClick) {
-  var t = i18n[currentLang];
-  if (localStorage.getItem("isSubscribed_95") === "true") return;
-
-  if (isManualClick) {
-    // 如果是试用期内点击“试用剩X天”，允许弹出并提供“暂不订阅，返回查看”按钮
-    document.getElementById("popTitle").innerText = t.popTitleManual;
-    document.getElementById("popDesc").innerText = t.popDescManual;
-    document.getElementById("closeModalBtn").style.display = "block";
-  }
-  document.getElementById("payOverlay").style.display = "flex";
-}
-
-function hidePayModal() {
-  document.getElementById("payOverlay").style.display = "none";
-}
 
 // 切换语言逻辑
 function toggleLang() {
@@ -307,52 +183,8 @@ function toggleLang() {
   document.getElementById("search").placeholder = t.searchPlh;
   document.getElementById("legendRow").innerHTML = t.legend;
   document.getElementById("pageNote").innerText = t.note;
-  document.getElementById("closeModalBtn").innerText = currentLang === "zh" ? "暂不订阅，返回查看" : "Back to view";
   
-  checkAuth();
   render();
-}
-
-async function handleSubscription() {
-  var statusDiv = document.getElementById("payStatus");
-  var actionBtn = document.getElementById("actionBtn");
-  var t = i18n[currentLang];
-  
-  if (typeof window.ethereum === 'undefined') {
-    statusDiv.style.color = "#c0392b";
-    statusDiv.innerText = t.walletErr;
-    return;
-  }
-  try {
-    actionBtn.disabled = true;
-    statusDiv.style.color = "#e67e22";
-    statusDiv.innerText = t.walletConn;
-    
-    var accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    var userAddress = accounts[0];
-    
-    statusDiv.innerText = t.walletSign;
-    var web3 = new Web3(window.ethereum);
-    var valueInWei = web3.utils.toWei(SUB_PRICE_ETH, 'ether');
-    
-    var txHash = await web3.eth.sendTransaction({
-      from: userAddress, to: MERCHANT_ADDRESS, value: valueInWei
-    });
-    
-    if (txHash.transactionHash) {
-      statusDiv.style.color = "#27ae60";
-      statusDiv.innerText = t.paySuccess;
-      localStorage.setItem("isSubscribed_95", "true");
-      setTimeout(function() {
-        document.getElementById("payOverlay").style.display = "none";
-        document.getElementById("payBtnTxt").innerText = t.unlocked;
-      }, 1500);
-    }
-  } catch (error) {
-    statusDiv.style.color = "#c0392b";
-    statusDiv.innerText = error.code === 4001 ? t.payCancel : (error.message.substring(0,40) + "...");
-    actionBtn.disabled = false;
-  }
 }
 
 // ================= 数据渲染核心逻辑 =================
@@ -496,6 +328,10 @@ function getFiltered(){
 
 function renderStats(rows){
   var t = i18n[currentLang];
+  if(rows.length === 0){
+    document.getElementById('statRow').innerHTML = '<div class="stat">No data</div>';
+    return;
+  }
   var allVals=[];
   rows.forEach(function(r){r.d.forEach(function(v){allVals.push(v);});});
   var maxV=Math.max.apply(null,allVals),minV=Math.min.apply(null,allVals);
@@ -548,7 +384,7 @@ function renderRank(rows){
     YEARS.forEach(function(_,yi){
       var rk=rankMaps[yi][r.n]||'-';
       var bg='',tc='#666';
-      if(typeof rk==='number'){
+      if(typeof rk==='number' && total > 0){
         var p=rk/total;
         if(p<=0.1){bg='#c0392b';tc='#fff';}
         else if(p<=0.25){bg='#f1948a';tc='#7f0c0c';}
@@ -607,12 +443,8 @@ function setView(v,btn){
   render();
 }
 
-// 初始化检查授权和渲染
-checkAuth();
+// 页面初始化加载数据
 render();
-
-// 每隔一分钟在后台校对一次时间
-setInterval(checkAuth, 60000);
 </script>
 </body>
 </html>
